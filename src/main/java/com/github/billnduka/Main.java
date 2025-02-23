@@ -4,6 +4,8 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane; // Or a more suitable layout
+import javafx.scene.paint.Color;
+import javafx.scene.image.Image;
 
 public class Main extends Application { // Main class must extend Application
 
@@ -14,8 +16,12 @@ public class Main extends Application { // Main class must extend Application
         Pane root = new Pane(); // You can change this to another layout later
 
         // Create the scene (the content of the window)
-        Scene scene = new Scene(root, 600, 400); // Set your desired window size
+        Scene scene = new Scene(root, 600, 400, Color.BISQUE); // Set your desired window size
 
+        Image icon = new Image(getClass().getResourceAsStream("/image.png"));
+
+
+        primaryStage.getIcons().add(icon);
         // Set the title of the window
         primaryStage.setTitle("Brick Breaker");
 
@@ -24,6 +30,7 @@ public class Main extends Application { // Main class must extend Application
 
         // Show the stage (make the window visible)
         primaryStage.show();
+        
     }
 
     public static void main(String[] args) {

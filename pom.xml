@@ -47,11 +47,18 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
                 <configuration>
-                    <release>17</release>  <compilerArgs>
-                        --module-path ${env.PATH_TO_FX} --add-modules javafx.controls,javafx.fxml,javafx.graphics  </compilerArgs>
+                    <release>17</release>
+                    <compilerArgs>
+                        <arg>--module-path</arg>
+                        <arg>${env.PATH_TO_FX}</arg>
+                        <arg>--add-modules</arg>
+                        <arg>javafx.controls,javafx.fxml,javafx.graphics</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
+
         </plugins>
+        <sourceDirectory>src/main/java</sourceDirectory>
     </build>
 
 </project>
