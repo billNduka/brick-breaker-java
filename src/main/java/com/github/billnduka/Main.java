@@ -3,32 +3,43 @@ package com.github.billnduka; // Your groupId
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
-import javafx.scene.layout.Pane; // Or a more suitable layout
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.*;
+import javafx.scene.layout.Pane; 
 import javafx.scene.paint.Color;
 import javafx.scene.image.Image;
+import javafx.scene.text.Text;
+import javafx.scene.text.Font;
 
-public class Main extends Application { // Main class must extend Application
+
+public class Main extends Application { 
+    private static final double WIDTH = 500.0;
+    private static final double HEIGHT = 500.0;
 
     @Override
-    public void start(Stage primaryStage) throws Exception { // The start method is where you set up your JavaFX UI
+    public void start(Stage primaryStage) throws Exception {
+        
 
-        // Create the root node (usually a layout like Pane, BorderPane, etc.)
-        Pane root = new Pane(); // You can change this to another layout later
-
-        // Create the scene (the content of the window)
-        Scene scene = new Scene(root, 600, 400, Color.BISQUE); // Set your desired window size
-
+        Pane root = new Pane();
+        Scene scene = new Scene(root, WIDTH, HEIGHT); 
         Image icon = new Image(getClass().getResourceAsStream("/image.png"));
+        Canvas canvas = new Canvas(HEIGHT, WIDTH);
+        GraphicsContext context = canvas.getGraphicsContext2D();
 
+        context.setFill(Color.BISQUE);
+        context.fillRect(WIDTH / 2 - 40, HEIGHT - 30, 80, 10);
 
         primaryStage.getIcons().add(icon);
-        // Set the title of the window
-        primaryStage.setTitle("Brick Breaker");
+        root.getChildren().add(canvas);
+        canvas.relocate(0, 0);
 
-        // Set the scene of the stage (window)
+        scene.setFill(Color.BLACK);
+        context.setFill(Color.BISQUE);
+        context.fillRect(WIDTH / 2 - 40, HEIGHT - 20, 80, 10);
+        primaryStage.setTitle("Brick Breaker");
         primaryStage.setScene(scene);
 
-        // Show the stage (make the window visible)
         primaryStage.show();
         
     }
