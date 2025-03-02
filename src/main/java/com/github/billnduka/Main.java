@@ -9,8 +9,10 @@ import javafx.scene.canvas.*;
 import javafx.scene.layout.Pane; 
 import javafx.scene.paint.Color;
 import javafx.scene.image.Image;
+import javafx.animation.AnimationTimer;
 import javafx.scene.text.Text;
 import javafx.scene.text.Font;
+
 
 
 public class Main extends Application 
@@ -28,14 +30,15 @@ public class Main extends Application
         Image icon = new Image(getClass().getResourceAsStream("/image.png"));
         Canvas canvas = new Canvas(HEIGHT, WIDTH);
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        Ball ball = new Ball(initX, initY, Color.WHITE, new double[] {1, 3});
+        Ball ball = new Ball(initX, initY, Color.WHITE, new double[] {5, 5});
+        Block block = new Block(100.0, 50.0, Color.WHITESMOKE);
 
 
-        gc.setFill(Color.BISQUE);
-        gc.fillRect(0, 0, WIDTH, HEIGHT);
+        clearScreen(gc);
         ball.drawBall(gc);
+        block.drawBlock(gc);
 
-
+        ball.updateBall(canvas, gc, ball, block);
         
         root.getChildren().add(canvas);
 
@@ -70,11 +73,74 @@ public class Main extends Application
             gc.strokeOval(this.xPos, this.yPos, Ball.radius, Ball.radius);
         }
 
-        private void updateBall()
+        private void updateBall(Canvas canvas, GraphicsContext gc, Ball ball, Block block)
         {
+            AnimationTimer timer = new AnimationTimer()
+            {
+                long lastUpdate;
+                private static final int TARGET_FPS = 30;  // Desired FPS
+                private static final long INTERVAL = 1_000_000_000 / TARGET_FPS; 
+                @Override
+                public void handle(long now)
+                {
+                    if (now - lastUpdate >= INTERVAL)
+                    {
+                        lastUpdate = now;
+                        clearScreen(gc);
+
+                        if(ball.xPos + 3 <= 0 || ball.xPos + 3 >= canvas.getWidth())
+                        {
+                            ball.velocity[0] = -ball.velocity[0];
+                        }
+                        if(ball.yPos + 3 <= 0 || ball.yPos + 3 >= canvas.getHeight())
+                        {
+                            ball.velocity[1] = -ball.velocity[1];
+                        }
+
+                        ball.xPos -= ball.velocity[0];
+                        ball.yPos -= ball.velocity[1];
+
+                        ball.drawBall(gc);
+                        block.drawBlock(gc);
+                    }
+                }
+
+            };
+
+            timer.start();
 
         }
         
+    }
+
+    private static class Block
+    {
+        double xPos, yPos;
+        Color blockColor;
+        static double height = 15.0;
+        static double width = 45.0;
+        static double arcWidth = 3; 
+        static double arcHeight = 3;
+
+        public Block(double x, double y, Color color)
+        {
+            xPos = x;
+            yPos = y; 
+            blockColor = color;
+        }
+        private void drawBlock(GraphicsContext gc)
+        {
+            gc.setStroke(this.blockColor);
+            gc.setLineWidth(3);
+            gc.strokeRoundRect(this.xPos, this.yPos, width, height, arcWidth, arcHeight);
+        };
+
+    }
+
+    public static void clearScreen(GraphicsContext gc)
+    {
+        gc.setFill(Color.BISQUE);
+        gc.fillRect(0, 0, WIDTH, HEIGHT);
     }
 
     public static void main(String[] args) 
