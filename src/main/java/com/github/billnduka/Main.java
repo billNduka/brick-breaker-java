@@ -30,21 +30,19 @@ public class Main extends Application
         Image icon = new Image(getClass().getResourceAsStream("/image.png"));
         Canvas canvas = new Canvas(HEIGHT, WIDTH);
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        Ball ball = new Ball(initX, initY, Color.WHITE, new double[] {5, 5});
-        Block block = new Block(100.0, 50.0, Color.WHITESMOKE);
+        Ball ball = new Ball(initX, initY, Color.WHITE, new double[] {5, 7});
+        Block[] blocks = new Block[1];
+        blocks[0] = new Block(100.0, 50.0, Color.WHITESMOKE);
 
 
         clearScreen(gc);
         ball.drawBall(gc);
-        block.drawBlock(gc);
+        blocks[0].drawBlock(gc);
 
-        ball.updateBall(canvas, gc, ball, block);
+        gameLoop(canvas, gc, ball, new Block(100.0, 50.0, Color.WHITESMOKE));
         
-        root.getChildren().add(canvas);
 
-        
-        
-        
+        root.getChildren().add(canvas);        
         primaryStage.getIcons().add(icon);
         primaryStage.setTitle("Brick Breaker");
         primaryStage.setScene(scene);
@@ -54,6 +52,7 @@ public class Main extends Application
     private static class Ball
     {
         static final double radius = 15.0;
+        static final double lineWidth = 3;
         double xPos, yPos;
         Color ballColor;
         double[] velocity = {0, 0};
@@ -69,46 +68,24 @@ public class Main extends Application
         private void drawBall(GraphicsContext gc)
         {
             gc.setStroke(this.ballColor);
-            gc.setLineWidth(3);
+            gc.setLineWidth(lineWidth);
             gc.strokeOval(this.xPos, this.yPos, Ball.radius, Ball.radius);
         }
 
-        private void updateBall(Canvas canvas, GraphicsContext gc, Ball ball, Block block)
+        private void updateBall(Canvas canvas)
         {
-            AnimationTimer timer = new AnimationTimer()
+            //Collision with canvas borders
+            if(this.xPos + 3 <= 0 || this.xPos + 3 >= canvas.getWidth())
             {
-                long lastUpdate;
-                private static final int TARGET_FPS = 30;  // Desired FPS
-                private static final long INTERVAL = 1_000_000_000 / TARGET_FPS; 
-                @Override
-                public void handle(long now)
-                {
-                    if (now - lastUpdate >= INTERVAL)
-                    {
-                        lastUpdate = now;
-                        clearScreen(gc);
+                this.velocity[0] = -this.velocity[0];
+            }
+            if(this.yPos + 3 <= 0 || this.yPos + 3 >= canvas.getHeight())
+            {
+                this.velocity[1] = -this.velocity[1];
+            }
 
-                        if(ball.xPos + 3 <= 0 || ball.xPos + 3 >= canvas.getWidth())
-                        {
-                            ball.velocity[0] = -ball.velocity[0];
-                        }
-                        if(ball.yPos + 3 <= 0 || ball.yPos + 3 >= canvas.getHeight())
-                        {
-                            ball.velocity[1] = -ball.velocity[1];
-                        }
-
-                        ball.xPos -= ball.velocity[0];
-                        ball.yPos -= ball.velocity[1];
-
-                        ball.drawBall(gc);
-                        block.drawBlock(gc);
-                    }
-                }
-
-            };
-
-            timer.start();
-
+            this.xPos -= this.velocity[0];
+            this.yPos -= this.velocity[1];
         }
         
     }
@@ -121,6 +98,7 @@ public class Main extends Application
         static double width = 45.0;
         static double arcWidth = 3; 
         static double arcHeight = 3;
+        static double lineWidth = 3;
 
         public Block(double x, double y, Color color)
         {
@@ -131,9 +109,20 @@ public class Main extends Application
         private void drawBlock(GraphicsContext gc)
         {
             gc.setStroke(this.blockColor);
-            gc.setLineWidth(3);
+            gc.setLineWidth(Block.lineWidth);
             gc.strokeRoundRect(this.xPos, this.yPos, width, height, arcWidth, arcHeight);
         };
+        private void checkCollision(Ball ball)
+        {
+            //Collision with top of block
+            if(ball.yPos + 2 * Ball.radius + Ball.lineWidth >= this.yPos + Block.lineWidth && 
+                ball.yPos + 2 * Ball.radius + Ball.lineWidth <= this.yPos &&
+                ball.xPos >= this.xPos && ball.xPos + 2 * Ball.radius + Ball.lineWidth <= this.xPos + Block.width + Block.lineWidth)
+            {
+                ball.velocity[0] = -ball.velocity[0];
+                ball.velocity[1] = -ball.velocity[1];
+            }
+        }
 
     }
 
@@ -141,6 +130,30 @@ public class Main extends Application
     {
         gc.setFill(Color.BISQUE);
         gc.fillRect(0, 0, WIDTH, HEIGHT);
+    }
+
+
+    public static void gameLoop(Canvas canvas, GraphicsContext gc, Ball ball, Block block)
+    {
+        AnimationTimer timer = new AnimationTimer()
+            {
+                @Override
+                public void handle(long now)
+                {
+                    clearScreen(gc);
+
+                    //update ball
+                    
+                    ball.updateBall(canvas);
+
+                    ball.drawBall(gc);
+                    block.drawBlock(gc);
+                
+                }
+
+            };
+
+            timer.start();
     }
 
     public static void main(String[] args) 
