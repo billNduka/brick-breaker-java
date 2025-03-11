@@ -30,12 +30,12 @@ public class Main extends Application
         Image icon = new Image(getClass().getResourceAsStream("/image.png"));
         Canvas canvas = new Canvas(HEIGHT, WIDTH);
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        Ball ball = new Ball(initX, initY, Color.WHITE, new double[] {5, 7});
+        Ball ball = new Ball(initX, initY, Color.WHITE, new double[] {2, 3});
         Block[] blocks = new Block[10];
 
         for(int i = 1; i <= blocks.length; i ++)
         {
-            blocks[i - 1] = new Block(50 * i, 15 + (45 * (i % 2)), Color.WHITESMOKE);
+            blocks[i - 1] = new Block(40 * i, 30 + (60 * (i % 2)), Color.WHITESMOKE);
         }
 
 
@@ -59,7 +59,7 @@ public class Main extends Application
 
     private static class Ball
     {
-        static final double radius = 15.0;
+        static final double radius = 12.0;
         static final double lineWidth = 3;
         double xPos, yPos;
         Color ballColor;
@@ -102,8 +102,8 @@ public class Main extends Application
     {
         double xPos, yPos;
         Color blockColor;
-        static double height = 15.0;
-        static double width = 45.0;
+        static double height = 20.0;
+        static double width = 50.0;
         static double arcWidth = 3; 
         static double arcHeight = 3;
         static double lineWidth = 3;
@@ -120,20 +120,38 @@ public class Main extends Application
             gc.setLineWidth(Block.lineWidth);
             gc.strokeRoundRect(this.xPos, this.yPos, width, height, arcWidth, arcHeight);
         };
-        private void checkCollision(Ball ball)
+        private void checkCollision(Ball ball) 
         {
-            //Collision with top of block
-            if(ball.yPos + 2 * Ball.radius + Ball.lineWidth >= this.yPos + Block.lineWidth && 
-                ball.yPos + 2 * Ball.radius + Ball.lineWidth <= this.yPos &&
-                ball.xPos >= this.xPos && ball.xPos + 2 * Ball.radius + Ball.lineWidth <= this.xPos + Block.width + Block.lineWidth)
+            double northPoint = ball.yPos - Ball.radius;
+            double southPoint = ball.yPos + Ball.radius;
+            double eastPoint = ball.xPos + Ball.radius;
+            double westPoint = ball.xPos - Ball.radius;
+        
+            final double BUFFER = 0.1; // Small threshold to prevent floating point errors
+        
+            if (
+                // Collision from bottom
+                ((ball.xPos > xPos) && (ball.xPos < xPos + width) && (northPoint <= yPos + height + BUFFER) && (northPoint > yPos - BUFFER)) ||
+                // Collision from top
+                ((ball.xPos > xPos) && (ball.xPos < xPos + width) && (southPoint >= yPos - BUFFER) && (southPoint < yPos + height + BUFFER))
+            ) 
+            {
+                ball.velocity[1] = -ball.velocity[1];
+                ball.yPos += ball.velocity[1];
+            }
+            if (
+                //Collision from right
+                ((ball.yPos > yPos) && (ball.yPos < yPos + height) && (westPoint < xPos + width + BUFFER) && (westPoint > xPos) ) ||
+                //Collision from left
+                ((ball.yPos > yPos) && (ball.yPos < yPos + height) && (eastPoint < xPos + width) && (eastPoint > xPos - BUFFER))
+                ) 
             {
                 ball.velocity[0] = -ball.velocity[0];
-                ball.velocity[1] = -ball.velocity[1];
+                ball.xPos += ball.velocity[0];
             }
         }
-
+        
     }
-
     public static void clearScreen(GraphicsContext gc)
     {
         gc.setFill(Color.BISQUE);
@@ -150,9 +168,14 @@ public class Main extends Application
                 {
                     clearScreen(gc);
 
-                    //update ball
-                    
+                    //Check collision                    
+
                     ball.updateBall(canvas);
+                    
+                    for(int i = 0; i < blocks.length; i ++)
+                    {
+                        blocks[i].checkCollision(ball);
+                    }
 
                     ball.drawBall(gc);
                     for(int i = 0; i < blocks.length; i ++)
