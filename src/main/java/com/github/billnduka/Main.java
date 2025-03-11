@@ -5,13 +5,13 @@ import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.*;
+//import javafx.scene.canvas.*;
 import javafx.scene.layout.Pane; 
 import javafx.scene.paint.Color;
 import javafx.scene.image.Image;
 import javafx.animation.AnimationTimer;
-import javafx.scene.text.Text;
-import javafx.scene.text.Font;
+// import javafx.scene.text.Text;
+// import javafx.scene.text.Font;
 
 
 
@@ -31,15 +31,23 @@ public class Main extends Application
         Canvas canvas = new Canvas(HEIGHT, WIDTH);
         GraphicsContext gc = canvas.getGraphicsContext2D();
         Ball ball = new Ball(initX, initY, Color.WHITE, new double[] {5, 7});
-        Block[] blocks = new Block[1];
-        blocks[0] = new Block(100.0, 50.0, Color.WHITESMOKE);
+        Block[] blocks = new Block[10];
+
+        for(int i = 1; i <= blocks.length; i ++)
+        {
+            blocks[i - 1] = new Block(50 * i, 15 + (45 * (i % 2)), Color.WHITESMOKE);
+        }
 
 
         clearScreen(gc);
         ball.drawBall(gc);
-        blocks[0].drawBlock(gc);
+        for(int i = 0; i < blocks.length; i ++)
+        {
+            blocks[i].drawBlock(gc);
+        }
+        
 
-        gameLoop(canvas, gc, ball, new Block(100.0, 50.0, Color.WHITESMOKE));
+        gameLoop(canvas, gc, ball, blocks);
         
 
         root.getChildren().add(canvas);        
@@ -133,7 +141,7 @@ public class Main extends Application
     }
 
 
-    public static void gameLoop(Canvas canvas, GraphicsContext gc, Ball ball, Block block)
+    public static void gameLoop(Canvas canvas, GraphicsContext gc, Ball ball, Block[] blocks)
     {
         AnimationTimer timer = new AnimationTimer()
             {
@@ -147,7 +155,10 @@ public class Main extends Application
                     ball.updateBall(canvas);
 
                     ball.drawBall(gc);
-                    block.drawBlock(gc);
+                    for(int i = 0; i < blocks.length; i ++)
+                    {
+                        blocks[i].drawBlock(gc);
+                    }
                 
                 }
 
