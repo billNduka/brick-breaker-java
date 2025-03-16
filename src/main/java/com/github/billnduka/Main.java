@@ -107,6 +107,7 @@ public class Main extends Application
         static double arcWidth = 3; 
         static double arcHeight = 3;
         static double lineWidth = 3;
+        boolean broken = false;
 
         public Block(double x, double y, Color color)
         {
@@ -122,36 +123,47 @@ public class Main extends Application
         };
         private void checkCollision(Ball ball) 
         {
-            double northPoint = ball.yPos - Ball.radius;
-            double southPoint = ball.yPos + Ball.radius;
-            double eastPoint = ball.xPos + Ball.radius;
-            double westPoint = ball.xPos - Ball.radius;
+            double northPoint = ball.yPos;
+            double southPoint = ball.yPos + 2 * Ball.radius;
+            double eastPoint = ball.xPos + 2 * Ball.radius;
+            double westPoint = ball.xPos;
         
-            final double BUFFER = 0.1; // Small threshold to prevent floating point errors
+            final double BUFFER = 0.5; // Small threshold to prevent floating point errors
         
             if (
-                // Collision from bottom
-                ((ball.xPos > xPos) && (ball.xPos < xPos + width) && (northPoint <= yPos + height + BUFFER) && (northPoint > yPos - BUFFER)) ||
-                // Collision from top
-                ((ball.xPos > xPos) && (ball.xPos < xPos + width) && (southPoint >= yPos - BUFFER) && (southPoint < yPos + height + BUFFER))
+                // Collision from bottom right
+                ((westPoint > xPos) && (westPoint < xPos + width) && (northPoint <= yPos + height + BUFFER) && (northPoint > yPos + height - BUFFER)) ||
+                // COllision from bottom left
+                ((eastPoint > xPos) && (eastPoint < xPos + width) && (northPoint <= yPos + height + BUFFER) && (northPoint > yPos + height - BUFFER)) ||
+                // Collision from top right
+                ((westPoint > xPos) && (westPoint < xPos + width) && (southPoint >= yPos - BUFFER) && (southPoint < yPos + BUFFER)) ||
+                // Collision from top left
+                ((eastPoint > xPos) && (eastPoint < xPos + width) && (southPoint >= yPos - BUFFER) && (southPoint < yPos + BUFFER))
             ) 
             {
                 ball.velocity[1] = -ball.velocity[1];
                 ball.yPos += ball.velocity[1];
+                this.broken = true;
             }
             if (
-                //Collision from right
-                ((ball.yPos > yPos) && (ball.yPos < yPos + height) && (westPoint < xPos + width + BUFFER) && (westPoint > xPos) ) ||
-                //Collision from left
-                ((ball.yPos > yPos) && (ball.yPos < yPos + height) && (eastPoint < xPos + width) && (eastPoint > xPos - BUFFER))
+                //Collision from bottom right
+                ((northPoint > yPos) && (northPoint < yPos + height) && (westPoint < xPos + width + BUFFER) && (westPoint > xPos) ) ||
+                //Collision from top right
+                ((southPoint > yPos) && (southPoint < yPos + height) && (westPoint < xPos + width + BUFFER) && (westPoint > xPos) ) ||
+                //Collision from bottom left
+                ((northPoint > yPos) && (northPoint < yPos + height) && (eastPoint < xPos + width) && (eastPoint > xPos - BUFFER)) ||
+                //Collision from bottom left
+                ((southPoint > yPos) && (southPoint < yPos + height) && (eastPoint < xPos + BUFFER) && (eastPoint > xPos - BUFFER))
                 ) 
             {
                 ball.velocity[0] = -ball.velocity[0];
                 ball.xPos += ball.velocity[0];
+                this.broken = true;
             }
         }
-        
+         
     }
+
     public static void clearScreen(GraphicsContext gc)
     {
         gc.setFill(Color.BISQUE);
@@ -174,13 +186,19 @@ public class Main extends Application
                     
                     for(int i = 0; i < blocks.length; i ++)
                     {
+                        if(!blocks[i].broken)
+                        {
                         blocks[i].checkCollision(ball);
+                        }
                     }
 
                     ball.drawBall(gc);
                     for(int i = 0; i < blocks.length; i ++)
                     {
-                        blocks[i].drawBlock(gc);
+                        if(!blocks[i].broken)
+                        {
+                            blocks[i].drawBlock(gc);
+                        }
                     }
                 
                 }
