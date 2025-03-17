@@ -20,7 +20,7 @@ public class Main extends Application
     private static final double WIDTH = 500.0;
     private static final double HEIGHT = 500.0;
     static final double initX = WIDTH / 2; 
-    static final double initY = HEIGHT - 15;
+    static final double initY = HEIGHT - 50;
 
     @Override
     public void start(Stage primaryStage) throws Exception 
@@ -32,6 +32,7 @@ public class Main extends Application
         GraphicsContext gc = canvas.getGraphicsContext2D();
         Ball ball = new Ball(initX, initY, Color.WHITE, new double[] {2, 3});
         Block[] blocks = new Block[10];
+        Paddle paddle = new Paddle(WIDTH / 2.0);
 
         for(int i = 1; i <= blocks.length; i ++)
         {
@@ -45,9 +46,10 @@ public class Main extends Application
         {
             blocks[i].drawBlock(gc);
         }
+        paddle.drawPaddle(gc);
         
 
-        gameLoop(canvas, gc, ball, blocks);
+        gameLoop(canvas, gc, ball, blocks, paddle);
         
 
         root.getChildren().add(canvas);        
@@ -80,15 +82,21 @@ public class Main extends Application
             gc.strokeOval(this.xPos, this.yPos, Ball.radius, Ball.radius);
         }
 
-        private void updateBall(Canvas canvas)
+        private void updateBall(Canvas canvas, Paddle paddle)
         {
             //Collision with canvas borders
-            if(this.xPos + 3 <= 0 || this.xPos + 3 >= canvas.getWidth())
+            if(this.xPos + lineWidth <= 0 || this.xPos + 2 * radius + lineWidth >= canvas.getWidth())
             {
                 this.velocity[0] = -this.velocity[0];
             }
-            if(this.yPos + 3 <= 0 || this.yPos + 3 >= canvas.getHeight())
+            if(this.yPos + lineWidth <= 0 || this.yPos + 2 * radius + lineWidth >= canvas.getHeight())
             {
+                this.velocity[1] = -this.velocity[1];
+            }
+            if((this.yPos + 2 * radius + lineWidth >= Paddle.yPos) && 
+            (((this.xPos > paddle.xPos) && (this.xPos < paddle.xPos + Paddle.width)) || ((this.xPos + 2 * radius > paddle.xPos) && (this.xPos + 2 * radius < paddle.xPos + Paddle.width))))
+            {
+                this.velocity[0] = -this.velocity[0];
                 this.velocity[1] = -this.velocity[1];
             }
 
@@ -164,6 +172,34 @@ public class Main extends Application
          
     }
 
+    private static class Paddle
+    {
+        double xPos;
+        static Color color = Color.WHITESMOKE;
+        static double height = 15.0;
+        static double width = 50.0;
+        static double arcWidth = 5; 
+        static double arcHeight = 3;
+        static double lineWidth = 3;
+        static double yPos = HEIGHT - (height + lineWidth);
+
+        public Paddle(double xPos)
+        {
+            this.xPos = xPos;
+        }
+
+        private void updatePaddle()
+        {
+
+        }
+        private void drawPaddle(GraphicsContext gc)
+        {
+            gc.setStroke(color);
+            gc.setLineWidth(lineWidth);
+            gc.strokeRoundRect(this.xPos, yPos, width, height, arcWidth, arcHeight);
+        }
+    }
+
     public static void clearScreen(GraphicsContext gc)
     {
         gc.setFill(Color.BISQUE);
@@ -171,7 +207,7 @@ public class Main extends Application
     }
 
 
-    public static void gameLoop(Canvas canvas, GraphicsContext gc, Ball ball, Block[] blocks)
+    public static void gameLoop(Canvas canvas, GraphicsContext gc, Ball ball, Block[] blocks, Paddle paddle)
     {
         AnimationTimer timer = new AnimationTimer()
             {
@@ -182,7 +218,7 @@ public class Main extends Application
 
                     //Check collision                    
 
-                    ball.updateBall(canvas);
+                    ball.updateBall(canvas, paddle);
                     
                     for(int i = 0; i < blocks.length; i ++)
                     {
@@ -193,6 +229,7 @@ public class Main extends Application
                     }
 
                     ball.drawBall(gc);
+
                     for(int i = 0; i < blocks.length; i ++)
                     {
                         if(!blocks[i].broken)
@@ -200,6 +237,8 @@ public class Main extends Application
                             blocks[i].drawBlock(gc);
                         }
                     }
+
+                    paddle.drawPaddle(gc);
                 
                 }
 
