@@ -1,17 +1,14 @@
-package com.github.billnduka; // Your groupId
+package com.github.billnduka; 
 
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.canvas.Canvas;
-//import javafx.scene.canvas.*;
 import javafx.scene.layout.Pane; 
 import javafx.scene.paint.Color;
 import javafx.scene.image.Image;
 import javafx.animation.AnimationTimer;
-// import javafx.scene.text.Text;
-// import javafx.scene.text.Font;
 
 
 
@@ -84,24 +81,40 @@ public class Main extends Application
 
         private void updateBall(Canvas canvas, Paddle paddle)
         {
-            //Collision with canvas borders
-            if(this.xPos + lineWidth <= 0 || this.xPos + 2 * radius + lineWidth >= canvas.getWidth())
+            //Collision with left canvas borders
+            if(xPos < 0)
             {
-                this.velocity[0] = -this.velocity[0];
+                xPos = 0;
+                velocity[0] = -velocity[0];
             }
-            if(this.yPos + lineWidth <= 0 || this.yPos + 2 * radius + lineWidth >= canvas.getHeight())
+            //Collision with right canvas border
+            if(xPos + 2 * radius > WIDTH)
             {
+                xPos = WIDTH - 2 * radius;
+                velocity[0] = -velocity[0];
+            }
+            //Collision with top canvas border
+            if(yPos < 0)
+            {
+                yPos = 0;
+                velocity[1] = -velocity[1];
+            }
+            //Collision with bottom canvas border
+            if(yPos + radius > HEIGHT)
+            {
+                yPos = HEIGHT -  radius;
                 this.velocity[1] = -this.velocity[1];
             }
-            if((this.yPos + 2 * radius + lineWidth >= Paddle.yPos) && 
-            (((this.xPos > paddle.xPos) && (this.xPos < paddle.xPos + Paddle.width)) || ((this.xPos + 2 * radius > paddle.xPos) && (this.xPos + 2 * radius < paddle.xPos + Paddle.width))))
+            //Collision with top of paddle
+            if((yPos +  radius > HEIGHT - Paddle.height) && (((xPos > paddle.xPos) && (xPos < paddle.xPos + Paddle.width)) || ((xPos +  radius < paddle.xPos + Paddle.width) && (xPos +  radius > paddle.xPos))))
             {
+                yPos = (HEIGHT - Paddle.height) - 2 * radius;
                 this.velocity[0] = -this.velocity[0];
                 this.velocity[1] = -this.velocity[1];
             }
 
-            this.xPos -= this.velocity[0];
-            this.yPos -= this.velocity[1];
+            xPos -= this.velocity[0];
+            yPos -= this.velocity[1];
         }
         
     }
@@ -190,7 +203,7 @@ public class Main extends Application
 
         private void updatePaddle()
         {
-
+            
         }
         private void drawPaddle(GraphicsContext gc)
         {
@@ -249,6 +262,6 @@ public class Main extends Application
 
     public static void main(String[] args) 
     {
-        launch(args); // Use launch() to start the JavaFX application
+        launch(args);
     }
 }
